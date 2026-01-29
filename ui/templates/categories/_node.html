@@ -1,0 +1,46 @@
+<li style="margin-left: {{ level }}rem;">
+  <div class="d-flex align-items-center mb-1">
+
+    <span class="me-2">▸</span>
+
+    <strong class="{% if not node.is_active %}text-muted{% endif %}">
+      {{ node.name }}
+    </strong>
+
+    <span class="badge bg-light text-dark ms-2">
+      {{ node.tx_count }}
+    </span>
+
+    <!-- Actions -->
+    <div class="ms-2">
+
+      <!-- Add sub-category -->
+      <a href="{% url 'category_create' %}?parent={{ node.id }}"
+         class="btn btn-sm btn-outline-primary">
+        + Sub
+      </a>
+
+      <!-- Edit -->
+      <a href="{% url 'category_edit' node.id %}"
+         class="btn btn-sm btn-outline-secondary">
+        Edit
+      </a>
+
+      <!-- Delete ONLY if no transactions -->
+      {% if node.tx_count == 0 %}
+        <a href="{% url 'category_delete' node.id %}"
+           class="btn btn-sm btn-outline-danger">
+          Delete
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if node.children_cached %}
+    <ul class="list-unstyled">
+      {% for child in node.children_cached %}
+        {% include "categories/_node.html" with node=child level=level|add:1 %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>

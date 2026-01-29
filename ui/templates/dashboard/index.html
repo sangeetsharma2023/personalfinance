@@ -1,0 +1,108 @@
+{% extends "base/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- KPI CARDS -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <small class="text-muted">Net Worth</small>
+      <h4 class="mt-1">₹ {{ networth|floatformat:0 }}</h4>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <small class="text-muted">Income (YTD)</small>
+      <h4 class="mt-1 text-success">₹ {{ income|floatformat:0 }}</h4>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <small class="text-muted">Expense (YTD)</small>
+      <h4 class="mt-1 text-danger">₹ {{ expense|floatformat:0 }}</h4>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3">
+      <small class="text-muted">Net Cash Flow</small>
+      <h4 class="mt-1">₹ {{ net|floatformat:0 }}</h4>
+    </div>
+  </div>
+</div>
+
+<!-- INCOME VS EXPENSE -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between">
+    <span>Income vs Expense (Monthly)</span>
+    <a href="/reports/income-expense/" class="btn btn-sm btn-outline-primary">
+      View full report
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Income</th>
+          <th>Expense</th>
+          <th>Net</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in monthly %}
+        <tr>
+          <td>{{ row.period|date:"M Y" }}</td>
+          <td class="text-success">₹ {{ row.income|floatformat:0 }}</td>
+          <td class="text-danger">₹ {{ row.expense|floatformat:0 }}</td>
+          <td>₹ {{ row.net|floatformat:0 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-muted py-3">
+            No data available
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- QUICK INSIGHTS -->
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Loans</h6>
+      <p class="mb-1">
+        Principal Paid: ₹ {{ cashflow.loans.principal_paid|floatformat:0 }}
+      </p>
+      <a href="/loans/" class="small">View loans →</a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Investments</h6>
+      <p class="mb-1">
+        Net Investment: ₹ {{ cashflow.investments.net_flow|floatformat:0 }}
+      </p>
+      <a href="/investments/" class="small">View investments →</a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h6>Cash Flow</h6>
+      <p class="mb-1">
+        Net Flow: ₹ {{ cashflow.net_cashflow|floatformat:0 }}
+      </p>
+      <a href="/reports/cashflow/" class="small">Cashflow report →</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

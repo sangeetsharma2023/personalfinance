@@ -1,0 +1,87 @@
+{% extends "base/base.html" %}
+{% block title %}Create Category{% endblock %}
+
+{% block content %}
+
+<div class="card p-4 col-md-7">
+  <h5 class="mb-3">Create Category</h5>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="row g-3">
+
+      <!-- Category Name -->
+      <div class="col-md-6">
+        <label class="form-label">Category Name</label>
+        <input
+          type="text"
+          class="form-control"
+          name="name"
+          placeholder="e.g. Fruits"
+          required>
+      </div>
+
+      <!-- Category Type -->
+      <div class="col-md-6">
+        <label class="form-label">Category Type</label>
+        <select
+          class="form-select"
+          name="category_type"
+          required>
+          {% for key, value in category_types %}
+            <option value="{{ key }}">{{ value }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Parent Category -->
+      <div class="col-md-6">
+        <label class="form-label">Parent Category</label>
+        <select class="form-select" name="parent">
+          <option value="">— None (Top level) —</option>
+
+          {% for p in parents %}
+            <option
+              value="{{ p.id }}"
+              {% if selected_parent == p.id|stringformat:"s" %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
+        <small class="text-muted">
+          Select parent to create a sub-category
+        </small>
+      </div>
+
+      <!-- Active / Inactive -->
+      <div class="col-md-6 d-flex align-items-end">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="is_active"
+            checked>
+          <label class="form-check-label">
+            Active
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary">
+        Create Category
+      </button>
+      <a href="{% url 'categories' %}"
+         class="btn btn-outline-secondary ms-2">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

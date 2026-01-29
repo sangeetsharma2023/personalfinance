@@ -1,0 +1,47 @@
+{% extends "base/base.html" %}
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="card p-4 col-md-7">
+  <h5 class="mb-3">Create Account</h5>
+
+  <form method="post">{% csrf_token %}
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <label class="form-label">Account Name</label>
+        <input class="form-control" name="name" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Account Type</label>
+        <select class="form-select" name="account_type" required>
+          {% for key, val in account_type_choices %}
+            <option value="{{ key }}">{{ val }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Opening Balance</label>
+        <input type="number" class="form-control" name="opening_balance">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Opening Date</label>
+        <input type="date" class="form-control" name="opening_date" required>
+      </div>
+
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="is_active" checked>
+          <label class="form-check-label">Active</label>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="btn btn-primary mt-4">Create</button>
+  </form>
+</div>
+{% endblock %}

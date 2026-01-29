@@ -1,0 +1,77 @@
+{% extends "base/base.html" %}
+{% block title %}Transaction Detail{% endblock %}
+
+{% block content %}
+<div class="card p-4 col-lg-8 mx-auto">
+
+  <h5 class="mb-2">{{ tx.narration|default:"Transaction" }}</h5>
+  <p class="text-muted mb-3">
+    {{ tx.date }} • {{ tx.get_transaction_type_display }}
+  </p>
+
+  <!-- Ledger -->
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th>DR</th>
+        <th>CR</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in tx.items.all %}
+      <tr>
+        <td>{{ item.account.name }}</td>
+        <td class="text-danger">
+          {% if item.is_debit %}₹{{ item.amount }}{% endif %}
+        </td>
+        <td class="text-success">
+          {% if not item.is_debit %}₹{{ item.amount }}{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Expense breakdown -->
+  {% if tx.transaction_type == "EXPENSE" %}
+  <h6 class="mt-4">Expense Breakdown</h6>
+
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Person</th>
+        <th>Tags</th>
+        <th class="text-end">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in tx.items.all %}
+        {% for ei in item.expense_items.all %}
+        <tr>
+          <td>{{ ei.category.name }}</td>
+          <td>{{ ei.description }}</td>
+          <td>{{ ei.person|default:"—" }}</td>
+          <td>
+            {% for tag in ei.tags.all %}
+              <span class="badge bg-secondary">{{ tag.name }}</span>
+            {% endfor %}
+          </td>
+          <td class="text-end">₹{{ ei.amount }}</td>
+        </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <div class="mt-3">
+    <a href="{% url 'transactions' %}" class="btn btn-outline-secondary btn-sm">
+      Back
+    </a>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base/base.html" %}
+{% block title %}Edit Tag{% endblock %}
+
+{% block content %}
+<div class="card p-4 col-md-6">
+  <h5>Edit Tag</h5>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Tag Name</label>
+      <input class="form-control" name="name" value="{{ tag.name }}" required>
+    </div>
+
+    <button class="btn btn-primary">Save</button>
+    <a href="{% url 'tags' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

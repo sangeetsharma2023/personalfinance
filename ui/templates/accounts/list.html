@@ -1,0 +1,61 @@
+{% extends "base/base.html" %}
+{% block title %}Accounts{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Accounts</h5>
+  <a href="{% url 'account_create' %}" class="btn btn-primary btn-sm">
+    + Add Account
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Opening Balance</th>
+          <th>Opening Date</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for acc in accounts %}
+        <tr class="{% if not acc.is_active %}table-light text-muted{% endif %}">
+          <td>{{ acc.name }}</td>
+          <td>{{ acc.get_account_type_display }}</td>
+          <td>₹ {{ acc.opening_balance|floatformat:0 }}</td>
+          <td>{{ acc.opening_date|date:"d M Y" }}</td>
+          <td>
+            {% if acc.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a href="{% url 'account_edit' acc.id %}"
+               class="btn btn-sm btn-outline-secondary">
+              Edit
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            No accounts created
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

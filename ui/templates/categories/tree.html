@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+  <h5>Categories</h5>
+  <a href="{% url 'category_create' %}" class="btn btn-primary btn-sm">
+    + Add Category
+  </a>
+</div>
+
+<div class="card p-3">
+  <ul class="list-unstyled">
+    {% for cat in categories %}
+      {% include "categories/_node.html" with node=cat level=0 %}
+    {% empty %}
+      <li class="text-muted">No categories created</li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}

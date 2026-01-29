@@ -1,0 +1,260 @@
+{% extends "base/base.html" %}
+{% block title %}New Transaction{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="card p-4 col-xl-8 col-lg-9 col-md-12 mx-auto">
+    <h5 class="mb-3">New Transaction</h5>
+
+    <!-- Transaction Type -->
+    <div class="btn-group mb-3" role="group">
+      <button type="button" class="btn btn-outline-primary active" data-type="EXPENSE">Expense</button>
+      <button type="button" class="btn btn-outline-primary" data-type="INCOME">Income</button>
+      <button type="button" class="btn btn-outline-primary" data-type="TRANSFER">Transfer</button>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="tx_type" id="tx_type" value="EXPENSE">
+
+      <div class="row g-3">
+
+        <!-- Date -->
+        <div class="col-md-4">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control" name="date"
+                 value="{{ today|date:'Y-m-d' }}" required>
+        </div>
+
+        <!-- Amount -->
+        <div class="col-md-4" id="amount-block">
+          <label class="form-label">Amount</label>
+          <input type="number" step="0.01" class="form-control"
+                 name="amount" id="amount">
+        </div>
+
+        <!-- Account (Expense / Income) -->
+        <div class="col-md-4" id="single-account-block">
+          <label class="form-label">Account</label>
+          <select class="form-select" name="account">
+            {% for acc in accounts %}
+              <option value="{{ acc.id }}">{{ acc.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Transfer: From / To -->
+        <div class="col-md-4 d-none" id="from-account-block">
+          <label class="form-label">From Account</label>
+          <select class="form-select" name="from_account">
+            {% for acc in accounts %}
+              <option value="{{ acc.id }}">{{ acc.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4 d-none" id="to-account-block">
+          <label class="form-label">To Account</label>
+          <select class="form-select" name="to_account">
+            {% for acc in accounts %}
+              <option value="{{ acc.id }}">{{ acc.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Narration -->
+        <div class="col-md-6">
+          <label class="form-label">Narration</label>
+          <input class="form-control" name="narration">
+        </div>
+      </div>
+
+      <!-- EXPENSE-ONLY BLOCK -->
+      <div id="expense-only-block">
+
+        <!-- Category -->
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+
+            <select class="form-select" name="category" id="expense-category">
+              {% for cat in expense_categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+
+            <select class="form-select d-none" name="category" id="income-category">
+              {% for cat in income_categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Split toggle -->
+        <div class="mt-3">
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="toggleSplit()">
+            + Split into multiple items
+          </button>
+        </div>
+
+        <!-- Split Items -->
+        <div id="items-block" class="d-none mt-3">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Amount</th>
+                <th>Category</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="items-body">
+              <tr>
+                <td>
+                  <input class="form-control" name="item_amount[]" disabled>
+                </td>
+                <td>
+                  <select class="form-select" name="item_category[]" disabled>
+                    {% for cat in expense_categories %}
+                      <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <button type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          onclick="this.closest('tr').remove()">×</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <button type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  onclick="addItemRow()">
+            + Add Item
+          </button>
+        </div>
+
+        <!-- Tags / Person -->
+        <div class="mt-3">
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="toggleAdvanced()">
+            + Tags / Person
+          </button>
+        </div>
+
+        <div id="advanced-block" class="d-none mt-3">
+          <div class="mb-3">
+            <label class="form-label">Tags</label>
+            <select class="form-select" name="tags" multiple>
+              {% for tag in tags %}
+                <option value="{{ tag.id }}">{{ tag.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Person</label>
+            <select class="form-select" name="person">
+              <option value="">— None —</option>
+              {% for p in persons %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4">
+        <button class="btn btn-primary">Save</button>
+        <a href="{% url 'transactions' %}"
+           class="btn btn-outline-secondary ms-2">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const txType = document.getElementById("tx_type");
+const expenseOnly = document.getElementById("expense-only-block");
+
+const singleAccount = document.getElementById("single-account-block");
+const fromAccount = document.getElementById("from-account-block");
+const toAccount = document.getElementById("to-account-block");
+
+const expCat = document.getElementById("expense-category");
+const incCat = document.getElementById("income-category");
+
+document.querySelectorAll("[data-type]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-type]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    txType.value = btn.dataset.type;
+
+    if (btn.dataset.type === "TRANSFER") {
+      singleAccount.classList.add("d-none");
+      fromAccount.classList.remove("d-none");
+      toAccount.classList.remove("d-none");
+
+      expenseOnly.classList.add("d-none");
+      disableInputs(expenseOnly);
+
+    } else {
+      singleAccount.classList.remove("d-none");
+      fromAccount.classList.add("d-none");
+      toAccount.classList.add("d-none");
+
+      expenseOnly.classList.remove("d-none");
+      enableInputs(expenseOnly);
+
+      if (btn.dataset.type === "INCOME") {
+        expCat.classList.add("d-none");
+        incCat.classList.remove("d-none");
+      } else {
+        incCat.classList.add("d-none");
+        expCat.classList.remove("d-none");
+      }
+    }
+  });
+});
+
+function toggleSplit() {
+  const block = document.getElementById("items-block");
+  const inputs = block.querySelectorAll("input, select");
+
+  const enable = block.classList.contains("d-none");
+  block.classList.toggle("d-none");
+
+  inputs.forEach(el => el.disabled = !enable);
+  document.getElementById("amount").disabled = enable;
+  expCat.disabled = enable;
+  incCat.disabled = enable;
+}
+
+function addItemRow() {
+  const row = document.querySelector("#items-body tr").cloneNode(true);
+  row.querySelectorAll("input").forEach(i => i.value = "");
+  document.getElementById("items-body").appendChild(row);
+}
+
+function toggleAdvanced() {
+  document.getElementById("advanced-block").classList.toggle("d-none");
+}
+
+function disableInputs(container) {
+  container.querySelectorAll("input, select").forEach(el => el.disabled = true);
+}
+
+function enableInputs(container) {
+  container.querySelectorAll("input, select").forEach(el => el.disabled = false);
+}
+</script>
+{% endblock %}

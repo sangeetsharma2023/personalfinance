@@ -1,0 +1,45 @@
+{% extends "base/base.html" %}
+{% block title %}Edit Person{% endblock %}
+
+{% block content %}
+
+<div class="card p-4 col-md-6">
+  <h5 class="mb-3">Edit Person</h5>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <label class="form-label">Name</label>
+        <input
+          class="form-control"
+          name="name"
+          value="{{ person.name }}"
+          required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Relation</label>
+        <input
+          class="form-control"
+          name="relation"
+          value="{{ person.relation }}"
+          placeholder="Self, Spouse, Child">
+      </div>
+
+    </div>
+
+    <div class="mt-4">
+      <button class="btn btn-primary">Save</button>
+      <a href="{% url 'persons' %}"
+         class="btn btn-outline-secondary ms-2">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

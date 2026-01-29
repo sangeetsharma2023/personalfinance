@@ -1,0 +1,71 @@
+{% extends "base/base.html" %}
+{% block title %}Persons{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+  <h5>Persons</h5>
+  <a href="{% url 'person_create' %}" class="btn btn-primary btn-sm">
+    + Add Person
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Account</th>
+          <th class="text-end">Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.date|date:"d M Y" }}</td>
+
+          <td>
+            {{ tx.narration|default:"—" }}
+            <br>
+            <small class="text-muted">{{ tx.get_transaction_type_display }}</small>
+          </td>
+
+          <td>
+            {% if tx.transaction_type == "TRANSFER" %}
+              {% with from_acc=tx.transfer_accounts.0 to_acc=tx.transfer_accounts.1 %}
+                <span class="text-danger">{{ from_acc.name }}</span>
+                <span class="mx-1">→</span>
+                <span class="text-success">{{ to_acc.name }}</span>
+              {% endwith %}
+            {% else %}
+              {{ tx.primary_account.name }}
+            {% endif %}
+          </td>
+
+          <td class="text-end fw-semibold">
+            {% if tx.transaction_type == "EXPENSE" %}
+              <span class="text-danger">₹{{ tx.display_amount }}</span>
+            {% elif tx.transaction_type == "INCOME" %}
+              <span class="text-success">₹{{ tx.display_amount }}</span>
+            {% else %}
+              ₹{{ tx.display_amount }}
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-muted">
+            No transactions found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+{% endblock %}
